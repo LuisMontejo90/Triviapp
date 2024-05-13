@@ -1,0 +1,516 @@
+import './style.css'
+import axios from 'axios'
+import 'bulma/css/bulma.min.css'
+
+
+const selectDificultad = document.querySelector('#dificultad')
+const selectTipoRes = document.querySelector('#type')
+const selectCategoria = document.querySelector('#categoria')
+const btnStart = document.querySelector('#startButton')
+const textCambiante = document.querySelector('#textchange')
+const btnIniciar = document.querySelector('#Goask')
+const btnSiguientePre = document.querySelector('#nextQuestion')
+const btnRopcion1 = document.querySelector('#opcion1')
+const btnRopcion2 = document.querySelector('#opcion2')
+const btnRopcion3 = document.querySelector('#opcion3')
+const btnRopcion4 = document.querySelector('#opcion4')
+const btnReiniciar = document.querySelector('#restart')
+const encabezado = document.querySelector('#texttitulo')
+const textPuntaje = document.querySelector('#textScore')
+const puntaje = document.querySelector('#puntaje')
+const alertExitoso = document.querySelector('#alertOk')
+const alertEquivocado = document.querySelector('#alertWrong')
+
+
+
+
+// Carga la pagina sin esos elementos
+window.onload = function () {
+  selectDificultad.style.display = 'none'
+  selectTipoRes.style.display = 'none'
+  selectCategoria.style.display = 'none'
+  btnIniciar.style.display = 'none'
+  btnSiguientePre.style.display = 'none'
+  btnRopcion1.style.display = 'none'
+  btnRopcion2.style.display = 'none'
+  btnRopcion3.style.display = 'none'
+  btnRopcion4.style.display = 'none'
+  btnReiniciar.style.display = 'none'
+  textPuntaje.style.display = 'none'
+  alertExitoso.style.display = 'none'
+  alertEquivocado.style.display = 'none'
+
+}
+
+//Conecta a la API y llena el SELECT de Categorias
+async function getCategory() {
+  const res = await axios.get('https://opentdb.com/api_category.php')
+  let dataRes = await res.data
+  console.log(dataRes.trivia_categories)
+
+  let select = document.getElementById('categoria')
+  for (let i = 0; i < dataRes.trivia_categories.length; i++) {
+
+    select.options[i] = new Option(dataRes.trivia_categories[i].name)
+  }
+}
+
+
+// Carga el contenido #2 y llama la funcion getCategory al dar click
+
+
+btnStart.addEventListener('click', (e) => {
+  e.preventDefault()
+
+
+  btnStart.style.display = 'none'
+  selectDificultad.style.display = 'block'
+  selectTipoRes.style.display = 'block'
+  selectCategoria.style.display = 'block'
+  btnIniciar.style.display = 'block'
+  textCambiante.innerText = 'Escoge la dificultad'
+  encabezado.innerText = 'TRIVIA APP'
+  localStorage.removeItem('score')
+
+  getCategory()
+})
+
+// Crea la URL con las opciones Seleccionados
+
+
+btnIniciar.addEventListener('click', (e) => { // Inicia btnIniciar
+  e.preventDefault()
+
+  textPuntaje.style.display = 'block'
+
+  const dificultad = selectDificultad.value
+  const tipo = selectTipoRes.value
+  const categoria = parseInt(selectCategoria.selectedIndex) + 9
+
+  var url = (`https://opentdb.com/api.php?amount=10&category=${categoria}&difficulty=${dificultad}&type=${tipo}`)
+  console.log(url)
+
+  async function getQuestions() {
+    const res = await axios.get(url)
+    console.log(res)
+    const dataRes = await res.data
+    console.log(dataRes.results)
+
+    // Imprime la primera pregunta
+    function printQuestions() {  //inicia funcion printQuestions
+
+      let contador = 0
+      console.log(contador)
+      textCambiante.innerText = dataRes.results[contador].question
+      selectDificultad.style.display = 'none'
+      selectTipoRes.style.display = 'none'
+      selectCategoria.style.display = 'none'
+      btnRopcion1.style.display = 'block'
+      btnRopcion2.style.display = 'block'
+      btnRopcion3.style.display = 'block'
+      btnRopcion4.style.display = 'block'
+      btnIniciar.style.display = 'none'
+      btnSiguientePre.style.display = 'block'
+
+
+
+
+
+      if (selectTipoRes.value === 'multiple') { //Inicia condiciones (if) Primera pregunta
+        console.log('hola mundo')
+        let opcion1 = dataRes.results[contador].correct_answer
+        let opcion2 = dataRes.results[contador].incorrect_answers[0]
+        let opcion3 = dataRes.results[contador].incorrect_answers[1]
+        let opcion4 = dataRes.results[contador].incorrect_answers[2]
+
+        let arrayOpciones = [opcion1, opcion2, opcion3, opcion4]
+
+        function desorResp() {
+          arrayOpciones.sort(function () { return Math.random() - 0.5 })
+          console.log(arrayOpciones)
+
+          btnRopcion1.innerText = arrayOpciones[0]
+          btnRopcion2.innerText = arrayOpciones[1]
+          btnRopcion3.innerText = arrayOpciones[2]
+          btnRopcion4.innerText = arrayOpciones[3]
+
+        } desorResp()
+
+
+
+        btnRopcion1.addEventListener('click', (e) => {
+          if (btnRopcion1.textContent === opcion1) {
+            alertExitoso.style.display = 'block'
+            alertEquivocado.style.display = 'none'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+            btnRopcion3.disabled = true
+            btnRopcion4.disabled = true
+            aumentarScore()
+
+          } else {
+            alertExitoso.style.display = 'none'
+            alertEquivocado.style.display = 'block'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+            btnRopcion3.disabled = true
+            btnRopcion4.disabled = true
+          }
+        })
+
+        btnRopcion2.addEventListener('click', (e) => {
+          if (btnRopcion2.textContent === opcion1) {
+            alertExitoso.style.display = 'block'
+            alertEquivocado.style.display = 'none'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+            btnRopcion3.disabled = true
+            btnRopcion4.disabled = true
+            aumentarScore()
+
+          } else {
+            alertExitoso.style.display = 'none'
+            alertEquivocado.style.display = 'block'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+            btnRopcion3.disabled = true
+            btnRopcion4.disabled = true
+          }
+        })
+
+        btnRopcion3.addEventListener('click', (e) => {
+          if (btnRopcion3.textContent === opcion1) {
+            alertExitoso.style.display = 'block'
+            alertEquivocado.style.display = 'none'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+            btnRopcion3.disabled = true
+            btnRopcion4.disabled = true
+            aumentarScore()
+
+          } else {
+            alertExitoso.style.display = 'none'
+            alertEquivocado.style.display = 'block'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+            btnRopcion3.disabled = true
+            btnRopcion4.disabled = true
+          }
+        })
+
+        btnRopcion4.addEventListener('click', (e) => {
+          if (btnRopcion4.textContent === opcion1) {
+            alertExitoso.style.display = 'block'
+            alertEquivocado.style.display = 'none'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+            btnRopcion3.disabled = true
+            btnRopcion4.disabled = true
+            aumentarScore()
+
+          } else {
+            alertExitoso.style.display = 'none'
+            alertEquivocado.style.display = 'block'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+            btnRopcion3.disabled = true
+            btnRopcion4.disabled = true
+          }
+        })
+
+      }   ////Termina condiciones (if) Primera pregunta
+
+
+      else if (selectTipoRes.value === 'boolean') { ////Inicia condiciones (else if) Primera pregunta
+        console.log('hola mundo')
+        btnRopcion3.style.display = 'none'
+        btnRopcion4.style.display = 'none'
+        let opcion1 = dataRes.results[contador].correct_answer
+        let opcion2 = dataRes.results[contador].incorrect_answers[0]
+
+        let arrayOpciones = [opcion1, opcion2]
+
+        function desorResp() {
+          arrayOpciones.sort(function () { return Math.random() - 0.5 })
+          console.log(arrayOpciones)
+
+          btnRopcion1.innerText = arrayOpciones[0]
+          btnRopcion2.innerText = arrayOpciones[1]
+
+
+        } desorResp()
+
+        btnRopcion1.addEventListener('click', (e) => {
+          if (btnRopcion1.textContent === opcion1) {
+            alertExitoso.style.display = 'block'
+            alertEquivocado.style.display = 'none'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+
+            aumentarScore()
+
+          } else {
+            alertExitoso.style.display = 'none'
+            alertEquivocado.style.display = 'block'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+
+          }
+        })
+
+        btnRopcion2.addEventListener('click', (e) => {
+          if (btnRopcion2.textContent === opcion1) {
+            alertExitoso.style.display = 'block'
+            alertEquivocado.style.display = 'none'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+            aumentarScore()
+
+          } else {
+            alertExitoso.style.display = 'none'
+            alertEquivocado.style.display = 'block'
+            btnRopcion1.disabled = true
+            btnRopcion2.disabled = true
+          }
+        })
+
+
+
+      } ////Termina condiciones (else if) Primera pregunta
+
+
+
+
+
+
+
+
+
+      btnSiguientePre.addEventListener('click', (e) => { //Inicia Boton Siguiente Pregunta
+        e.preventDefault()
+        const ctnMax = 10
+        contador++
+        console.log(contador)
+        textCambiante.innerText = dataRes.results[contador].question
+        alertExitoso.style.display = 'none'
+        alertEquivocado.style.display = 'none'
+        btnRopcion1.style.display = 'block'
+        btnRopcion2.style.display = 'block'
+        btnRopcion3.style.display = 'block'
+        btnRopcion4.style.display = 'block'
+        btnSiguientePre.style.display = 'block'
+
+
+
+        if ( contador < ctnMax && selectTipoRes.value === 'multiple') {  //Inicia Condicion If Siguiente Pregunta
+          console.log('hola mundo')
+          let opcion1 = dataRes.results[contador].correct_answer
+          let opcion2 = dataRes.results[contador].incorrect_answers[0]
+          let opcion3 = dataRes.results[contador].incorrect_answers[1]
+          let opcion4 = dataRes.results[contador].incorrect_answers[2]
+
+          let arrayOpciones = [opcion1, opcion2, opcion3, opcion4]
+
+          function desorResp() {
+            arrayOpciones.sort(function () { return Math.random() - 0.5 })
+            console.log(arrayOpciones)
+
+            btnRopcion1.innerText = arrayOpciones[0]
+            btnRopcion2.innerText = arrayOpciones[1]
+            btnRopcion3.innerText = arrayOpciones[2]
+            btnRopcion4.innerText = arrayOpciones[3]
+
+          } desorResp()
+
+
+
+          btnRopcion1.addEventListener('click', (e) => {
+            if (btnRopcion1.textContent === opcion1) {
+              alertExitoso.style.display = 'block'
+              alertEquivocado.style.display = 'none'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+              btnRopcion3.disabled = true
+              btnRopcion4.disabled = true
+              console.log('btnuno')
+              aumentarScore()
+
+            } else {
+              alertExitoso.style.display = 'none'
+              alertEquivocado.style.display = 'block'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+              btnRopcion3.disabled = true
+              btnRopcion4.disabled = true
+            }
+          })
+
+
+          btnRopcion2.addEventListener('click', (e) => {
+
+            if (btnRopcion2.textContent === opcion1) {
+              alertExitoso.style.display = 'block'
+              alertEquivocado.style.display = 'none'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+              btnRopcion3.disabled = true
+              btnRopcion4.disabled = true
+              console.log('btndos')
+              aumentarScore()
+
+            } else {
+              alertExitoso.style.display = 'none'
+              alertEquivocado.style.display = 'block'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+              btnRopcion3.disabled = true
+              btnRopcion4.disabled = true
+            }
+          })
+
+          btnRopcion3.addEventListener('click', (e) => {
+            if (btnRopcion3.textContent === opcion1) {
+              alertExitoso.style.display = 'block'
+              alertEquivocado.style.display = 'none'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+              btnRopcion3.disabled = true
+              btnRopcion4.disabled = true
+              console.log('bttres')
+              aumentarScore()
+
+            } else {
+              alertExitoso.style.display = 'none'
+              alertEquivocado.style.display = 'block'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+              btnRopcion3.disabled = true
+              btnRopcion4.disabled = true
+            }
+          })
+
+          btnRopcion4.addEventListener('click', (e) => {
+            if (btnRopcion4.textContent === opcion1) {
+              alertExitoso.style.display = 'block'
+              alertEquivocado.style.display = 'none'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+              btnRopcion3.disabled = true
+              btnRopcion4.disabled = true
+              console.log('btcuadtro')
+              aumentarScore()
+
+            } else {
+              alertExitoso.style.display = 'none'
+              alertEquivocado.style.display = 'block'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+              btnRopcion3.disabled = true
+              btnRopcion4.disabled = true
+            }
+          })
+
+          
+
+        } //Termina Condicion If Siguiente Pregunta
+
+
+
+        else if (contador < ctnMax && selectTipoRes.value === 'boolean' ) {
+          console.log('hola mundo')
+          btnRopcion3.style.display = 'none'
+          btnRopcion4.style.display = 'none'
+
+          let opcion1 = dataRes.results[contador].correct_answer
+          let opcion2 = dataRes.results[contador].incorrect_answers[0]
+
+
+          let arrayOpciones = [opcion1, opcion2]
+
+          function desorResp() {
+            arrayOpciones.sort(function () { return Math.random() - 0.5 })
+            console.log(arrayOpciones)
+
+            btnRopcion1.innerText = arrayOpciones[0]
+            btnRopcion2.innerText = arrayOpciones[1]
+
+
+          } desorResp()
+
+          btnRopcion1.addEventListener('click', (e) => {
+            if (btnRopcion1.textContent === opcion1) {
+              alertExitoso.style.display = 'block'
+              alertEquivocado.style.display = 'none'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+              aumentarScore()
+
+
+
+            } else {
+              alertExitoso.style.display = 'none'
+              alertEquivocado.style.display = 'block'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+
+
+            }
+          })
+
+          btnRopcion2.addEventListener('click', (e) => {
+            if (btnRopcion2.textContent === opcion1) {
+              alertExitoso.style.display = 'block'
+              alertEquivocado.style.display = 'none'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+              aumentarScore()
+
+            } else {
+              alertExitoso.style.display = 'none'
+              alertEquivocado.style.display = 'block'
+              btnRopcion1.disabled = true
+              btnRopcion2.disabled = true
+            }
+          })
+
+        }
+
+
+        
+        else if(contador === ctnMax){console.log('fin')}
+
+        btnRopcion1.disabled = false
+        btnRopcion2.disabled = false
+        btnRopcion3.disabled = false
+        btnRopcion4.disabled = false
+      }) //Termina Boton Siguiente Pregunta
+
+      
+    } //Termina funcion printQuestions
+
+    printQuestions()
+
+  }
+
+  getQuestions()
+
+
+
+})
+
+
+
+
+
+
+function aumentarScore() {
+  const inicialScore = JSON.parse(localStorage.getItem('score'))
+  const sumScore = 100
+  const newScore = inicialScore + sumScore
+  localStorage.setItem('score', JSON.stringify(newScore))
+  console.log(puntaje.innerText = newScore)
+}
+
+
+
+

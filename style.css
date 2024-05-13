@@ -1,0 +1,27 @@
+.contenedor{
+
+  height: 700px;
+  display: flex;
+  justify-content:center;
+  align-items: center;
+  
+  
+}
+
+.contenedor .text-center {
+
+  width: 400px;
+}
+
+
+.btn-group-lg{
+  display: grid;
+  
+}
+
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    
+  }
